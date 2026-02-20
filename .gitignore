@@ -1,0 +1,24 @@
+# Agent
+.agent/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Common build/dependency directories (optional but recommended)
+node_modules/
+target/
+dist/
+build/
+__pycache__/
