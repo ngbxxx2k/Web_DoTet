@@ -1,4 +1,4 @@
-package com.store.e_commerce.service;
+package com.store.e_commerce.service.impl;
 
 import com.store.e_commerce.dto.request.IngestRequest;
 import com.store.e_commerce.dto.response.ChatbotFileResponse;
@@ -6,6 +6,8 @@ import com.store.e_commerce.entity.ChatbotFile;
 import com.store.e_commerce.entity.FileStatus;
 import com.store.e_commerce.exception.ResourceNotFoundException;
 import com.store.e_commerce.repository.ChatbotFileRepository;
+import com.store.e_commerce.service.ChatbotFileService;
+import com.store.e_commerce.service.PythonClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ChatbotFileService {
+public class ChatbotFileServiceImpl implements ChatbotFileService {
 
     private final ChatbotFileRepository chatbotFileRepository;
     private final PythonClientService pythonClientService;
@@ -35,6 +37,7 @@ public class ChatbotFileService {
     /**
      * Upload file, lưu record MySQL, gọi async Python ingest
      */
+    @Override
     public ChatbotFileResponse uploadFile(MultipartFile file) throws IOException {
         log.info("[Chatbot] Upload file: {}, size: {} bytes", file.getOriginalFilename(), file.getSize());
 
@@ -62,7 +65,7 @@ public class ChatbotFileService {
         chatbotFile = chatbotFileRepository.save(chatbotFile);
         log.info("[Chatbot] Record đã lưu, id={}", chatbotFile.getId());
 
-        // Gọi async Python 
+        // Gọi async Python ingest (không block)
         IngestRequest ingestRequest = IngestRequest.builder()
                 .fileId(chatbotFile.getId())
                 .filePath(filePath.toAbsolutePath().toString())
@@ -76,6 +79,7 @@ public class ChatbotFileService {
     /**
      * Lấy danh sách tất cả file
      */
+    @Override
     public List<ChatbotFileResponse> getAllFiles() {
         log.info("[Chatbot] Lấy danh sách file");
         return chatbotFileRepository.findAll().stream()
@@ -86,6 +90,7 @@ public class ChatbotFileService {
     /**
      * Xóa file: xóa file vật lý + record MySQL + gọi Python xóa vectors
      */
+    @Override
     public void deleteFile(Long id) {
         log.info("[Chatbot] Xóa file id={}", id);
 

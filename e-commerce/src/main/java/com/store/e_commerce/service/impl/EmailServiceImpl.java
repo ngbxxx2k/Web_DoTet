@@ -1,6 +1,8 @@
-package com.store.e_commerce.service;
+package com.store.e_commerce.service.impl;
 
 import com.store.e_commerce.dto.request.ContactRequest;
+import com.store.e_commerce.service.EmailService;
+import com.store.e_commerce.service.SystemSettingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,10 +17,11 @@ import java.util.Properties;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EmailService {
+public class EmailServiceImpl implements EmailService {
 
     private final SystemSettingService systemSettingService;
 
+    @Override
     public void sendEmail(String to, String subject, String body) {
         try {
             JavaMailSender sender = createJavaMailSender();
@@ -32,7 +35,7 @@ public class EmailService {
             helper.setFrom(fromEmail, fromName);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(body, true); 
+            helper.setText(body, true); // true = html
 
             sender.send(message);
             log.info("Email sent successfully to: {}", to);
@@ -41,12 +44,13 @@ public class EmailService {
         }
     }
 
+    @Override
     public void sendContactEmail(ContactRequest request) {
         Map<String, String> settings = systemSettingService.getAllSettings();
         String notificationEmail = settings.get("notification_email");
         
         if (notificationEmail == null || notificationEmail.isEmpty()) {
-            
+            // Fallback to support email or log warning
             notificationEmail = settings.get("support_email");
              if (notificationEmail == null || notificationEmail.isEmpty()) {
                  log.warn("No notification email configured. Contact message not sent.");
@@ -71,18 +75,19 @@ public class EmailService {
         Map<String, String> settings = systemSettingService.getAllSettings();
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        
+        // Fetch settings from DB
         String host = settings.getOrDefault("mail_host", "smtp.gmail.com");
         String portStr = settings.getOrDefault("mail_port", "587");
-        String username = settings.get("mail_username"); 
-        String password = settings.get("mail_password"); 
+        String username = settings.get("mail_username"); // Updated key
+        String password = settings.get("mail_password"); // Updated key
 
+        // Legacy compatibility
         if (username == null) username = settings.get("smtp_user");
         if (password == null) password = settings.get("smtp_password");
 
         if (username == null || password == null) {
             log.warn("Email configuration is missing in database. Email sending may fail.");
-             
+             // Return unconfigured sender, will fail on connect
         }
 
         mailSender.setHost(host);

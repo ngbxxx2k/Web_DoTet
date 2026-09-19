@@ -1,4 +1,4 @@
-package com.store.e_commerce.service;
+package com.store.e_commerce.service.impl;
 
 import com.store.e_commerce.dto.request.CategoryRequest;
 import com.store.e_commerce.dto.response.CategoryResponse;
@@ -6,6 +6,7 @@ import com.store.e_commerce.entity.Category;
 import com.store.e_commerce.exception.ResourceNotFoundException;
 import com.store.e_commerce.mapper.CategoryMapper;
 import com.store.e_commerce.repository.CategoryRepository;
+import com.store.e_commerce.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
